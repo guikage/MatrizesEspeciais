@@ -38,10 +38,24 @@ void preenche_matriz(int x, int y, int z, int ***mat){
 }
 
 void imprime_matriz(int x, int y, int z, int ***mat){
-    //TODO
+    int i, j, k;
+    for(i = 0; i < x; i++){
+        for(j = 0; j < y; j++){
+            for(k = 0; k < z; k++){
+                printf("%d\t", mat[i][j][k]);
+            }
+            putchar('\n');
+        }
+        putchar('\n');
+    }
 }
 
 int main(){
-    //TODO
+    int ***m, x, y, z;
+    printf("Digite as dimensoes x, y e z da matriz: ");
+    scanf("%d %d %d", &x, &y, &z);
+    m = aloca_matriz(x, y, z);
+    preenche_matriz(x, y, z, m);
+    imprime_matriz(x, y, z, m);
     return 0;
 }
