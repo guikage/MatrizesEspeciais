@@ -199,6 +199,4 @@ int main() {
 
         escolher_opcao(&esparsa, opcao);        
     } while (opcao != 's');
-
-
 }
