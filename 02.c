@@ -6,7 +6,7 @@ struct lista
     int linha;
     int coluna;
     int info;
-    struct lista* prox;
+    struct lista *prox;
 };
 
 typedef struct lista Lista;
@@ -15,7 +15,7 @@ struct esparsa
 {
     int linhas;
     int colunas;
-    struct lista* prim;
+    struct lista *prim;
 };
 
 typedef struct esparsa Esparsa;
@@ -28,7 +28,7 @@ Esparsa matriz_esparsa_criar(int linhas, int colunas) {
     };
 }
 
-int matriz_esparsa_quantidade_de_elementos(Esparsa *esparsa) {
+int matriz_esparsa_tamanho(Esparsa *esparsa) {
     int tamanho = 0;
     
     for (Lista *no = esparsa->prim; no != NULL; no = no->prox) {
@@ -38,18 +38,48 @@ int matriz_esparsa_quantidade_de_elementos(Esparsa *esparsa) {
     return tamanho;
 }
 
-double matriz_esparsa_preenchido(Esparsa *esparsa) {
-    int preenchido = matriz_esparsa_quantidade_de_elementos(esparsa);
+double matriz_esparsa_porcentagem_preenchido(Esparsa *esparsa) {
+    int preenchido = matriz_esparsa_tamanho(esparsa);
     int total = esparsa->linhas * esparsa->colunas;
 
-    return (double)preenchido / total;
+    return (double)preenchido / total * 100.0;
 }
 
+void matriz_esparsa_remover_elemento(Esparsa *esparsa, int linha, int coluna)
+{
+    Lista *anterior = NULL;
+    Lista *atual = esparsa->prim;
+
+    while (atual && atual->linha != linha && atual->coluna != coluna) {
+        anterior = atual;
+        atual = atual->prox;
+    }
+
+    if (atual == NULL) {
+        return;
+    }
+
+    if (anterior == NULL) {
+        esparsa->prim = atual->prox;
+    } else {
+        anterior->prox = atual->prox;
+    }
+
+    free(atual);
+}
+
+
 void matriz_esparsa_inserir_elemento(Esparsa *esparsa, int linha, int coluna, int info) {
+    matriz_esparsa_remover_elemento(esparsa, linha, coluna);
+
+    if (info == 0) {
+        return;
+    }
+
     Lista *no = (Lista *)malloc(sizeof(Lista));
 
     if (no == NULL) {
-        printf("Ocorreu um problema ao alocar o no [%d, %d] = %d\n");
+        printf("Ocorreu um problema ao alocar o no [%d, %d] = %d\n", linha, coluna, info);
         exit(1);
     }
 
@@ -87,36 +117,40 @@ void matriz_esparsa_preencher(Esparsa *esparsa) {
     int linha, coluna;
 
     do {
-
         printf("Digite a linha e a coluna (-1 -1 para finalizar): ");
         scanf("%d %d", &linha, &coluna);
 
-        if (linha > -1 && coluna > -1) {
-            int info;
-
-            printf("[%d, %d] = ", linha, coluna);
-            scanf("%d", &info);
-
-            if (info != 0) {
-                matriz_esparsa_inserir_elemento(esparsa, linha, coluna, info);
-            }
+        if (linha < 0 || coluna < 0) {
+            continue;
         }
+
+        if (linha >= esparsa->linhas || coluna >= esparsa->colunas) {
+            printf("A posicao [%d, %d] nao faz parte da matriz.\n\n", linha, coluna);
+            continue;
+        }
+
+        int info;
+
+        printf("[%d, %d] = ", linha, coluna);
+        scanf("%d", &info);
+
+        matriz_esparsa_inserir_elemento(esparsa, linha, coluna, info);
         
         printf("\n");
-    } while (linha > -1 && coluna > -1);
+    } while (linha >= 0 && coluna >= 0);
 }
 
 void matriz_esparsa_imprimir(Esparsa *esparsa) {
     printf("   ");
 
     for (int j = 0; j < esparsa->colunas; j++) {
-        printf(" %03d", j);
+        printf(" %3d", j);
     }
 
     printf("\n");
 
     for (int i = 0; i < esparsa->linhas; i++) {
-        printf("%03d", i);
+        printf("%3d", i);
 
         for (int j = 0; j < esparsa->colunas; j++) {
             int elemento = matriz_esparsa_consultar_elemento(esparsa, i, j);
@@ -130,7 +164,7 @@ void matriz_esparsa_imprimir(Esparsa *esparsa) {
 }
 
 void imprimir_menu() {
-    printf("Menu:\n");
+    printf("\nMenu:\n");
     printf("a) Imprimir matriz\n");
     printf("b) Preencher elementos\n");
     printf("c) Consultar elemento\n");
@@ -139,7 +173,7 @@ void imprimir_menu() {
     printf("s) Sair\n\n");
 }
 
-void escolher_opcao(Esparsa *esparsa, char opcao) {
+void realizar_operacao(Esparsa *esparsa, char opcao) {
     switch (opcao) {
         case 'a':
             matriz_esparsa_imprimir(esparsa);
@@ -155,7 +189,7 @@ void escolher_opcao(Esparsa *esparsa, char opcao) {
 
                 int elemento = matriz_esparsa_consultar_elemento(esparsa, linha, coluna);
 
-                printf("[%d, %d] = %d\n\n", linha, coluna, elemento);
+                printf("[%d, %d] = %d\n", linha, coluna, elemento);
                 break;
             }
         case 'd':
@@ -164,14 +198,14 @@ void escolher_opcao(Esparsa *esparsa, char opcao) {
                 printf("Digite a linha para somar: ");
                 scanf("%d", &linha);
 
-                printf("Soma: %d\n\n", matriz_esparsa_somar_linha(esparsa, linha));
+                printf("Soma: %d\n", matriz_esparsa_somar_linha(esparsa, linha));
 
                 break;
             }
         case 'i':
             {
-                double porcentagem = matriz_esparsa_preenchido(esparsa);
-                printf("Total preenchido: %.2lf%%\n\n", porcentagem * 100);
+                double porcentagem = matriz_esparsa_porcentagem_preenchido(esparsa);
+                printf("Total preenchido: %.2lf%%\n", porcentagem);
 
                 break;
             }
@@ -197,6 +231,8 @@ int main() {
         printf("O que voce deseja fazer? ");
         scanf(" %c", &opcao);
 
-        escolher_opcao(&esparsa, opcao);        
+        realizar_operacao(&esparsa, opcao);        
     } while (opcao != 's');
+
+    return 0;
 }

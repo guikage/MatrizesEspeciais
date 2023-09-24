@@ -33,21 +33,19 @@ void matriz_identidade_remover_violacao(MatrizIdentidade *matriz, int linha, int
         return;
     }
 
-    Elemento *proximo = atual->proximo;
+    if (anterior == NULL) {
+        matriz->violacoes = atual->proximo;
+    } else {
+        anterior->proximo = atual->proximo;
+    }
 
     free(atual);
-
-    if (anterior == NULL) {
-        matriz->violacoes = proximo;
-    } else {
-        anterior->proximo = proximo;
-    }
 }
 
 void matriz_identidade_inserir_elemento(MatrizIdentidade *matriz, int linha, int coluna, int valor) {
     matriz_identidade_remover_violacao(matriz, linha, coluna);
 
-    if (linha == coluna && valor == 1 || linha != coluna && valor == 0) {
+    if ((linha == coluna && valor == 1) || (linha != coluna && valor == 0)) {
         return;
     }
 
@@ -85,15 +83,22 @@ void matriz_identidade_preencher(MatrizIdentidade *matriz) {
         printf("Digite a linha e a coluna (-1 -1 para finalizar): ");
         scanf("%d %d", &linha, &coluna);
 
-        if (linha > -1 && coluna > -1) {
-            int valor;
-
-            printf("[%d, %d] = ", linha, coluna);
-            scanf("%d", &valor);
-
-            matriz_identidade_inserir_elemento(matriz, linha, coluna, valor);
+        if (linha < 0 || coluna < 0) {
+            continue;
         }
-    } while (linha > -1 && coluna > -1);
+
+        if (linha >= matriz->ordem || coluna >= matriz->ordem) {
+            printf("A posicao [%d, %d] nao faz parte da matriz.\n", linha, coluna);
+            continue;
+        }
+
+        int valor;
+
+        printf("[%d, %d] = ", linha, coluna);
+        scanf("%d", &valor);
+
+        matriz_identidade_inserir_elemento(matriz, linha, coluna, valor);
+    } while (linha >= 0 && coluna >= 0);
 
     printf("\n");
 }
@@ -121,4 +126,6 @@ int main() {
 
     matriz_identidade_preencher(&matriz);
     matriz_identidade_imprimir_violacoes(&matriz);
+
+    return 0;
 }

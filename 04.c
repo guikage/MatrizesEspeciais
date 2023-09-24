@@ -1,61 +1,84 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int ***aloca_matriz(int x, int y, int z){
-    int i, j, k;
-    int ***m = (int***)malloc(x * sizeof(int**));
-    if (m == NULL){
-        printf("Ops, ocorreu um problema.");
-        exit(1);
+void verificar_alocacao(void *resultado)
+{
+    if (resultado != NULL) {
+        return;
     }
-    for(i = 0; i < x; i++){
-        m[i] = (int**)malloc(y * sizeof(int*));
-        if(m[i] == NULL){
-            printf("Ops, ocorreu um problema.");
-            exit(1);
-        }
-        for(j = 0; j < y; j++){
-            m[i][j] = (int*)malloc(z * sizeof(int));
-            if(m[i][j] == NULL){
-                printf("Ops, ocorreu um problema.");
-                exit(1);
-            }
-        }
-    }
-    return m;
+
+    printf("Oops, ocorreu um problema ao realizar a alocação.\n");
+    printf("Encerrando...\n");
+    exit(1);
 }
 
-void preenche_matriz(int x, int y, int z, int ***mat){
-    int i, j, k;
-    for(i = 0; i < x; i++){
-        for(j = 0; j < y; j++){
-            for(k = 0; k < z; k++){
-                printf("Digite o elemento na posicao [%d][%d][%d]: ", i, j, k);
+int ***aloca_matriz(int m, int n, int z) {
+    int ***mat = (int ***)malloc(m * sizeof(int **));
+    verificar_alocacao(mat);
+
+    for (int i = 0; i < m; i++) {
+        mat[i] = (int **)malloc(n * sizeof(int *));
+        verificar_alocacao(mat[i]);
+
+        for (int j = 0; j < n; j++) {
+            mat[i][j] = (int *)malloc(z * sizeof(int));
+            verificar_alocacao(mat[i][j]);
+        }
+    }
+
+    return mat;
+}
+
+void preenche_matriz(int m, int n, int z, int ***mat){
+    printf("Preenchimento:\n");
+
+    for (int k = 0; k < z; k++) {
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                printf("Digite o elemento na posicao [%d, %d, %d]: ", i, j, k);
                 scanf("%d", &mat[i][j][k]);
             }
         }
     }
 }
 
-void imprime_matriz(int x, int y, int z, int ***mat){
-    int i, j, k;
-    for(i = 0; i < x; i++){
-        for(j = 0; j < y; j++){
-            for(k = 0; k < z; k++){
-                printf("%d\t", mat[i][j][k]);
-            }
-            putchar('\n');
+void imprime_matriz(int m, int n, int z, int ***mat) {
+    printf("\nVisualizacao:\n");
+
+    for (int k = 0; k < z; k++) {
+        printf("k = %d\n", k);
+        printf("   ");
+
+        for (int j = 0; j < n; j++) {
+            printf(" %3d", j);
         }
-        putchar('\n');
+
+        printf("\n");
+
+        for (int i = 0; i < m; i++) {
+            printf("%3d", i);
+
+            for (int j = 0; j < n; j++) {
+                printf(" %3d", mat[i][j][k]);
+            }
+            
+            printf("\n");
+        }
+
+        printf("\n\n");
     }
 }
 
-int main(){
-    int ***m, x, y, z;
-    printf("Digite as dimensoes x, y e z da matriz: ");
-    scanf("%d %d %d", &x, &y, &z);
-    m = aloca_matriz(x, y, z);
-    preenche_matriz(x, y, z, m);
-    imprime_matriz(x, y, z, m);
+int main() {
+    int m, n, z;
+
+    printf("Digite o numero de linhas, de colunas e de profundidade da matriz: ");
+    scanf("%d %d %d", &m, &n, &z);
+
+    int ***mat = aloca_matriz(m, n, z);
+
+    preenche_matriz(m, n, z, mat);
+    imprime_matriz(m, n, z, mat);
+
     return 0;
 }
