@@ -1,65 +1,112 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct diagonal{
+struct diagonal {
     int ordem;
     int *v;
 };
+
 typedef struct diagonal Diagonal;
 
-void aloca_vetor(Diagonal *diag, int ordem){
-    diag->ordem = ordem;
-    diag->v = (int*)malloc(ordem * sizeof(int));
-    if (diag->v == NULL){
-        printf("\nErro fatal. Encerrando o programa.");
+Diagonal aloca_matriz(int ordem) {
+    Diagonal diag;
+
+    diag.ordem = ordem;
+    diag.v = (int *)malloc(ordem * sizeof(int));
+
+    if (diag.v == NULL) {
+        printf("Erro fatal. Encerrando o programa...\n");
         exit(1);
     }
+
+    return diag;
 }
 
-void preenche_vetor(Diagonal *diag){
-    int i;
-    for(i = 0; i < diag->ordem; i++){
-        printf("\nDigite o elemento na posicao [%d,%d]: ", i, i);
+void preenche_matriz(Diagonal *diag) {
+    for (int i = 0; i < diag->ordem; i++) {
+        printf("Digite o elemento na posicao [%d,%d]: ", i, i);
         scanf("%d", &diag->v[i]);
     }
 }
 
-void imprime_matriz(Diagonal *diag){
-    int i, j;
-    putchar('\n');
-    for(i = 0; i < diag->ordem; i++){
-        putchar('\n');
-        for(j = 0; j < diag->ordem; j++){
-            if(i == j){
-                printf("%d\t", diag->v[i]);
-            }
-            else{
-                printf("0\t");
-            }
-        }
+int consulta_matriz(Diagonal *diag, int i, int j) {
+    if (i == j && i < diag->ordem) {
+        return diag->v[i];
     }
-}
 
-int consulta_elemento(Diagonal diag, int i, int j){
-    if(i < diag.ordem && j < diag.ordem){
-        if(i = j){
-            return diag.v[i];
-        }
-        else{
-            return 0;
-        }
-    }
     return 0;
 }
 
-int main(){
-    Diagonal d;
+void imprime_matriz(Diagonal *diag) {
+    printf("   ");
+
+    for (int j = 0; j < diag->ordem; j++) {
+        printf(" %3d", j);
+    }
+
+    printf("\n");
+
+    for (int i = 0; i < diag->ordem; i++) {
+        printf("%3d", i);
+
+        for (int j = 0; j < diag->ordem; j++) {
+            printf(" %3d", consulta_matriz(diag, i, j));
+        }
+
+        printf("\n");
+    }
+}
+
+void imprime_menu() {
+    printf("Menu:\n");
+    printf("a) Imprimir matriz\n");
+    printf("b) Preencher matriz\n");
+    printf("c) Consultar matriz\n");
+    printf("s) Sair\n");
+}
+
+void realizar_operacao(Diagonal *diag, char opcao) {
+
+    switch (opcao)
+    {
+    case 'a':
+        imprime_matriz(diag);
+        break;
+    case 'b':
+        preenche_matriz(diag);
+        break;
+    case 'c':
+        {
+            int linha, coluna;
+            
+            printf("Digite a linha e a coluna: ");
+            scanf("%d %d", &linha, &coluna);
+
+            printf("[%d, %d] = %d\n", linha, coluna, consulta_matriz(diag, linha, coluna));
+        }
+    }
+
+    printf("\n");
+}
+
+int main() {
     int ordem;
+
     printf("Digite a ordem da matriz: ");
     scanf("%d", &ordem);
-    aloca_vetor(&d, ordem);
-    preenche_vetor(&d);
-    imprime_matriz(&d);
+
+    Diagonal diag = aloca_matriz(ordem);
+
+    char opcao;
+
+    do {
+        imprime_menu();
+        printf("\nO que voce deseja fazer? ");
+
+        scanf(" %c", &opcao);
+
+        realizar_operacao(&diag, opcao);
+    } while (opcao != 's');
 
     return 0;
 }
