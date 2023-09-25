@@ -24,7 +24,7 @@ void matriz_identidade_remover_violacao(MatrizIdentidade *matriz, int linha, int
     Elemento *anterior = NULL;
     Elemento *atual = matriz->violacoes;
 
-    while (atual && atual->linha != linha && atual->coluna != coluna) {
+    while (atual && (atual->linha != linha || atual->coluna != coluna)) {
         anterior = atual;
         atual = atual->proximo;
     }

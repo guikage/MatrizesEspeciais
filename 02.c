@@ -50,7 +50,7 @@ void matriz_esparsa_remover_elemento(Esparsa *esparsa, int linha, int coluna)
     Lista *anterior = NULL;
     Lista *atual = esparsa->prim;
 
-    while (atual && atual->linha != linha && atual->coluna != coluna) {
+    while (atual && (atual->linha != linha || atual->coluna != coluna)) {
         anterior = atual;
         atual = atual->prox;
     }
